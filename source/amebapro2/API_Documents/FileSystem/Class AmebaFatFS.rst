@@ -62,6 +62,10 @@ A class for file management using FatFS File system.
 +----------------------------+------------------------------------------+
 | AmebaFatFS::status         | Check if the file system is initialized  |
 +----------------------------+------------------------------------------+
+| AmebaFatFS::get_free_space | Retrieve the free space of SDcard        |
++----------------------------+------------------------------------------+
+| AmebaFatFS::get_used_space | Retrieve the used space of SDcard        |
++----------------------------+------------------------------------------+
 
 **AmebaFatFS::AmebaFatFS**
 --------------------------
@@ -604,3 +608,66 @@ This function returns 1 if the file system is initialized, 0 otherwise.
 NA
 
 .. note :: "AmebaFatFS.h" must be included to use the class function.
+
+**AmebaFatFS::get_free_space**
+------------------------------
+
+**Description**
+~~~~~~~~~~~~~~~
+
+Retrieve the free space of SDcard.  
+
+**Syntax**
+~~~~~~~~~~
+
+.. code-block:: c++
+
+    long long int get_free_space(void);
+
+**Parameters**
+~~~~~~~~~~~~~~
+NA
+
+**Returns**
+~~~~~~~~~~~
+
+This function returns the value of free space size up to 8-bytes.
+
+**Example Code**
+~~~~~~~~~~~~~~~~
+
+Example: `GetFreeAndUseSpace <https://github.com/Ameba-AIoT/ameba-arduino-pro2/blob/dev/Arduino_package/hardware/libraries/FileSystem/examples/GetFreeAndUseSpace/GetFreeAndUseSpace.ino>`_
+
+.. note :: "AmebaFatFS.h" must be included to use the class function.
+
+**AmebaFatFS::get_used_space**
+------------------------------
+
+**Description**
+~~~~~~~~~~~~~~~
+
+Retrieve the used space of SDcard.  
+
+**Syntax**
+~~~~~~~~~~
+
+.. code-block:: c++
+
+    long long int get_used_space(void);
+
+**Parameters**
+~~~~~~~~~~~~~~
+NA
+
+**Returns**
+~~~~~~~~~~~
+
+This function returns the value of used space size up to 8-bytes.
+
+**Example Code**
+~~~~~~~~~~~~~~~~
+
+Example: `GetFreeAndUseSpace <https://github.com/Ameba-AIoT/ameba-arduino-pro2/blob/dev/Arduino_package/hardware/libraries/FileSystem/examples/GetFreeAndUseSpace/GetFreeAndUseSpace.ino>`_
+
+.. note :: "AmebaFatFS.h" must be included to use the class function.
+    

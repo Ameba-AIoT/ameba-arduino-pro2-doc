@@ -11,4 +11,5 @@ Neural Network
    Face Recognition
    Image Classification
    Object Detection
+   UVCD Object Detection
    

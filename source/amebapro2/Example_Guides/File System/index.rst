@@ -6,3 +6,5 @@ File System
 
    Read and display HTML file from SD card
    Simple applications with SD card
+   Display Free and Use space of SD card
+   

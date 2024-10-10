@@ -1636,6 +1636,10 @@ A class used to configure and initialize the camera to generate video data strea
 | Video::printInfo           | Print out current configuration of      |
 |                            | video channels.                         |
 +----------------------------+-----------------------------------------+
+| Video::videostream_status  | Retrieve video stream module contents   |
+|                            | from specific channel and pass for      |
+|                            | checking on UVC connection status.      |
++----------------------------+-----------------------------------------+
 
 **Video::configVideoChannel**
 -----------------------------
@@ -1998,5 +2002,39 @@ NA
 ~~~~~~~~~~~~~~~~
 
 Example: `StreamRTSP/VideoOnly <https://github.com/Ameba-AIoT/ameba-arduino-pro2/blob/dev/Arduino_package/hardware/libraries/Multimedia/examples/StreamRTSP/VideoOnly/VideoOnly.ino>`_
+
+.. note :: "VideoStream.h" must be included to use the class function.
+
+**Video::videostream_status**
+------------------------------
+
+**Description**
+~~~~~~~~~~~~~~~
+
+Retrieve video stream module contents from specific channel and pass for checking on UVC connection status.
+
+**Syntax**
+~~~~~~~~~~
+
+.. code-block:: c++
+
+    int videostream_status(int ch);
+
+**Parameters**
+~~~~~~~~~~~~~~
+
+ch: Channel to configure.
+
+- 0    
+
+**Returns**
+~~~~~~~~~~~
+
+This function returns 1 if the UVC device is connected to PC, 0 otherwise.
+
+**Example Code**
+~~~~~~~~~~~~~~~~
+
+Example: `UVCDObjectDetectionLoop <https://github.com/Ameba-AIoT/ameba-arduino-pro2/blob/dev/Arduino_package/hardware/libraries/NeuralNetwork/examples/UVCDObjectDetectionLoop/UVCDObjectDetectionLoop.ino>`_
 
 .. note :: "VideoStream.h" must be included to use the class function.
