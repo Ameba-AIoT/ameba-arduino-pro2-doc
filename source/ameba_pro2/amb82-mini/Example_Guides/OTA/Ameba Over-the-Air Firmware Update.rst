@@ -14,7 +14,15 @@ In this example, we use a web UI to upload firmware to one or more AMB82 Mini.
 
 For the instructions to set up web UI for AmebaPro2 OTA: Web UI, please click into the link below and perform the steps as shown in the ``README.md``. [https://github.com/Ameba-AioT/ameba-OTA-UI]
 
-If Ameba OTA Web UI is set up successfully in your PC, you will see the webpage on [http://localhost:3000/], figure below shows the rendering of webpage with no device connected:
+The web UI supports both **HTTP** and **HTTPS** modes:
+
+- **HTTP** (default): no certificate needed, server listens on port 3000
+- **HTTPS** (recommended): requires a self-signed certificate, server listens on port 443
+  Run ``bash setup-https.sh`` in the ameba-OTA-UI directory to generate certificates and start the HTTPS server.
+
+If Ameba OTA Web UI is set up successfully in your PC, you will see the webpage
+(at ``http://localhost:3000/`` for HTTP mode or ``https://localhost:443/`` for HTTPS mode).
+The figure below shows the rendering of webpage with no device connected:
 
 |image01|
 
@@ -36,13 +44,20 @@ Before compiling and upload the example, please complete the following steps:
 
 |image05|
 
-4. Modify the port number and IP address according to your HTTP server.
+4. Select the protocol mode by changing the ``OTA_USE_HTTPS`` flag at the top of the sketch:
+
+   .. code-block:: c++
+
+      #define OTA_USE_HTTPS 1   // HTTPS (port 443, requires server.key + server.crt)
+      // #define OTA_USE_HTTPS 0   // HTTP  (port 3000, no certificate needed)
+
+   Then set the server IP address. The port number is automatically selected based on the flag.
 
 |image06|
 
 Now, compile and upload this example into each and every board that you have. It can be one board or multiple boards (we will be using two AMB82 Mini boards in this example guide).
 
-This set up must be done at least once to allow the OTA thread API to be called for the first time. For subsequent firmware updates, as long as ``OTA.h`` is included and ``start_ota_threads`` API is called in the setup function, you do not need to re-upload the code manually.
+This set up must be done at least once to allow the OTA thread API to be called for the first time. For subsequent firmware updates, as long as ``OTA.h`` is included and ``start_OTA_threads`` API is called in the setup function, you do not need to re-upload the code manually.
 
 Once uploaded, press reset button and get the IP address of the individual AMB82 Mini on serial monitor.
 
@@ -54,7 +69,7 @@ Board 2 IP address: 192.168.3.65
 
 |image08|
 
-Then, go to Ameba OTA Web UI [http://localhost:3000/] to view the connected device(s).
+Then, go to Ameba OTA Web UI (``http://localhost:3000/`` for HTTP or ``https://localhost:443/`` for HTTPS) to view the connected device(s).
 
 |image09|
 
@@ -64,7 +79,12 @@ For the steps below, you may disconnect AMB82 Mini from your PC and power up the
 
 |image10|
 
-In this tutorial, we will be uploading a NTPClient sketch via OTA.  Open the NTPClient example. :guilabel:`File -> Examples -> NTPClient -> Basic` Include the header file ``OTA.h`` and at the end of setup function, add in the API ``start_OTA_threads`` and define the port number and ip address according to your HTTP server. Also modify the SSID and password according to your AP. Refer to the picture below for the modified NTPClient sketch.
+In this tutorial, we will be uploading a NTPClient sketch via OTA.  Open the NTPClient example. :guilabel:`File -> Examples -> NTPClient -> Basic` Include the header file ``OTA.h`` and at the end of setup function, add in the API ``start_OTA_threads``. Set the server IP address and choose the protocol (HTTP or HTTPS) using the ``useSSL`` parameter. Also modify the SSID and password according to your AP. Refer to the picture below for the modified NTPClient sketch.
+
+.. code-block:: c++
+
+   // HTTP:  ota.start_OTA_threads(3000, "192.168.3.14");
+   // HTTPS: ota.start_OTA_threads(443, "192.168.3.14", true);
 
 |image11|
 
@@ -154,32 +174,66 @@ You will see the output generated on serial monitor after reboot.
 Code Reference
 --------------
 
+The OTA example uses a ``#define OTA_USE_HTTPS`` flag at the top of the sketch to
+switch between HTTP and HTTPS mode.
+
+.. code-block:: c++
+
+   // Set to 0 for HTTP  (port 3000, no SSL)
+   // Set to 1 for HTTPS (port 443, SSL enabled)
+   #define OTA_USE_HTTPS 1
+
+   #if OTA_USE_HTTPS
+   int port = 443;
+   char* server = "192.168.3.14";
+   OTA ota;
+   #else
+   int port = 3000;
+   char* server = "192.168.3.14";
+   OTA ota;
+   #endif
+
+The API call automatically adapts based on the flag:
+
+.. code-block:: c++
+
+   #if OTA_USE_HTTPS
+   ota.start_OTA_threads(port, server, true);   // HTTPS with SSL
+   #else
+   ota.start_OTA_threads(port, server);         // HTTP without SSL
+   #endif
+
 **Multithreading:**
 
 Two threads are written in ``start_OTA_threads()`` to ensure successful OTA update.
 
-Thread 1: For the purpose of connectivity check, the OTA state is sent to the server from AMB82 Mini board. Once received, the OTA state of the board will be shown on the Web UI.
+Thread 1: For the purpose of connectivity check, the OTA state is sent to the server
+from AMB82 Mini board. When using HTTPS, the connection is secured via TLS over
+``WiFiSSLClient``. Once received, the OTA state of the board will be shown on the Web UI.
 
 .. code-block:: c++
 
-  thread1_id = os_thread_create_arduino(thread1_task, NULL, priority1, stack_size1);
+   thread1_id = os_thread_create_arduino(thread1_task, NULL, priority1, stack_size1);
 
-  // First thread is to do keep alive connectivity check (post requests every 5s)
-  if (thread1_id) {
-      Serial.println("[OTA] Keep-alive connectivity thread created success-fully.");
-  } else {
-      Serial.println("[OTA] Failed to create keep-alive connectivity thread.");
-  }
+   // First thread is to do keep alive connectivity check (post requests every 5s)
+   if (thread1_id) {
+       Serial.println("[OTA] Keep-alive connectivity thread created success-fully.");
+   } else {
+       Serial.println("[OTA] Failed to create keep-alive connectivity thread.");
+   }
 
-Thread 2: To listen for the OTA begin signal from server, once ``start_ota`` signal is received, AMB82 Mini will request for the firmware to be downloaded via OTA.
+Thread 2: To listen for the OTA begin signal from server, once ``start_ota`` signal is
+received, AMB82 Mini will request for the firmware to be downloaded via OTA.
+The firmware download uses ``https_update_ota()`` when HTTPS is enabled, or
+``http_update_ota()`` for plain HTTP.
 
 .. code-block:: c++
 
-  thread2_id = os_thread_create_arduino(thread2_task, NULL, priority1, stack_size2);
+   thread2_id = os_thread_create_arduino(thread2_task, NULL, priority1, stack_size2);
 
-  // Second thread is to get the signal to start OTA process.
-  if (thread2_id) {
-      Serial.println("[OTA] Start OTA process thread created successfully.");
-  } else {
-      Serial.println("[OTA] Failed to create Start OTA process thread.");
-  }
+   // Second thread is to get the signal to start OTA process.
+   if (thread2_id) {
+       Serial.println("[OTA] Start OTA process thread created successfully.");
+   } else {
+       Serial.println("[OTA] Failed to create Start OTA process thread.");
+   }
