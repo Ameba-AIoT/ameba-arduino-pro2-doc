@@ -12,13 +12,16 @@ Example
 
 In this example, we use a web UI to upload firmware to one or more AMB82 Mini.
 
-For the instructions to set up web UI for AmebaPro2 OTA: Web UI, please click into the link below and perform the steps as shown in the ``README.md``. [https://github.com/Ameba-AioT/ameba-OTA-UI]
+For the instructions to set up web UI for AmebaPro2 OTA: Web UI, please click into the link below and perform the steps as shown in the ``README.md``. [https://github.com/Ameba-AIoT/ameba-OTA-UI]
 
 The web UI supports both **HTTP** and **HTTPS** modes:
 
 - **HTTP** (default): no certificate needed, server listens on port 3000
 - **HTTPS** (recommended): requires a self-signed certificate, server listens on port 443
   Run ``bash setup-https.sh`` in the ameba-OTA-UI directory to generate certificates and start the HTTPS server.
+
+.. note::
+   For **HTTPS** server, kindly use port 8443 if there is a permission issue with port 443
 
 If Ameba OTA Web UI is set up successfully in your PC, you will see the webpage
 (at ``http://localhost:3000/`` for HTTP mode or ``https://localhost:443/`` for HTTPS mode).
